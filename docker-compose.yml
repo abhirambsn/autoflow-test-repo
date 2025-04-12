@@ -1,0 +1,27 @@
+version: "3.8"
+services:
+  app:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+    environment:
+      - APP_SETTINGS=development
+    depends_on:
+      # Add any dependencies here, e.g., database
+      # - db
+    restart: always
+
+  # Example database service (if needed)
+  # db:
+  #   image: postgres:13
+  #   volumes:
+  #     - db_data:/var/lib/postgresql/data
+  #   environment:
+  #     POSTGRES_USER: example
+  #     POSTGRES_PASSWORD: example
+  #     POSTGRES_DB: example
+
+# volumes:
+#   db_data:
