@@ -1,0 +1,13 @@
+version: "3.8"
+services:
+  app:
+    build: .
+    ports:
+      - "8000:8000" # Adjust ports as needed
+    volumes:
+      - .:/app
+    environment:
+      - PYTHONUNBUFFERED=1 # Ensures logs are printed immediately
+    # Add any other environment variables your app needs here
+    # environment:
+    #   - VARIABLE_NAME=variable_value
