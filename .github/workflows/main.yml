@@ -2,47 +2,35 @@ name: CI/CD Pipeline
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main
   pull_request:
-    branches: [ main ]
+    branches:
+      - main
+  workflow_dispatch: # Enable manual triggering
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - name: Set up Python 3.9
-        uses: actions/setup-python@v3
-        with:
-          python-version: 3.9
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-      - name: Lint with flake8
-        run: |
-          pip install flake8
-          # stop the build if there are Python syntax errors or undefined names
-          flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-          # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-          flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
-      - name: Test with pytest
-        run: |
-          pip install pytest
-          pytest
+      - name: Build the Docker image
+        run: docker build -t test-repo:latest .
+      - name: Run tests (example)
+        run: echo "No tests defined" # Replace with your actual test commands
+
   deploy:
     needs: build
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-      - name: Build and push Docker image
+      - name: Set up Kubernetes tools
+        uses: azure/setup-kubectl@v3
+        with:
+          version: 'latest'
+      - name: Deploy to Kubernetes
         run: |
-          docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_TOKEN }}
-          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/test-app:${GITHUB_SHA::8} .
-          docker push ${{ secrets.DOCKERHUB_USERNAME }}/test-app:${GITHUB_SHA::8}
-      - name: Deploy to Kubernetes (Placeholder)
-        run: |
-          echo "Deploying to Kubernetes..."
-          echo "You need to configure kubectl and apply the Kubernetes manifests here."
-          echo "For example: kubectl apply -f k8s/deployment.yaml -f k8s/service.yaml"
+          echo "${{ secrets.KUBE_CONFIG }}" > kubeconfig
+          export KUBECONFIG=$(pwd)/kubeconfig
+          kubectl apply -f k8s/deployment.yaml

@@ -1,23 +1,17 @@
-# Use a lightweight Python base image
-FROM python:3.9-slim-buster
+# Use an official Docker image as a parent image
+FROM alpine/git as builder
 
 # Set the working directory
 WORKDIR /app
 
-# Copy the requirements file
-COPY requirements.txt .
+# Clone the repository
+RUN git clone https://github.com/${{ github.repository }} .
 
-# Install the dependencies
-RUN pip install --no-cache-dir -r requirements.txt
+# Use a base image
+FROM alpine/git
 
-# Copy the application code
-COPY . .
+# Copy the application code from the builder stage
+COPY --from=builder /app .
 
-# Expose the port the app runs on
-EXPOSE 8000
-
-# Set environment variables (optional, but good practice)
-ENV APP_NAME="TestApp"
-
-# Define the command to run the application
-CMD ["python", "main.py"]
+# Command to run the application
+CMD ["/bin/sh"]
