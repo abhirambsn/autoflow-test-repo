@@ -1,17 +1,11 @@
-# Use an official Docker image as a parent image
-FROM alpine/git as builder
+# Use the official Docker image as the base image
+FROM docker:latest
 
 # Set the working directory
 WORKDIR /app
 
-# Clone the repository
-RUN git clone https://github.com/${{ github.repository }} .
+# Install Docker CLI
+RUN apk add --no-cache docker-cli
 
-# Use a base image
-FROM alpine/git
-
-# Copy the application code from the builder stage
-COPY --from=builder /app .
-
-# Command to run the application
-CMD ["/bin/sh"]
+# Define a simple command to check Docker version
+CMD ["docker", "--version"]
